@@ -441,7 +441,7 @@ const DynamicLeadTimeDashboard = () => {
                     stroke="#ff9500" 
                     strokeDasharray="5 5" 
                     strokeWidth={2}
-                    label={{ value: `P85: ${p85Value}d`, position: 'topRight' }}
+                    label={{ value: `P85: ${p85Value}d`, position: 'insideTopRight' }}
                   />
                 )}
                 {showP95 && (
@@ -450,7 +450,7 @@ const DynamicLeadTimeDashboard = () => {
                     stroke="#ff0000" 
                     strokeDasharray="5 5" 
                     strokeWidth={2}
-                    label={{ value: `P95: ${p95Value}d`, position: 'topRight' }}
+                    label={{ value: `P95: ${p95Value}d`, position: 'insideTopRight' }}
                   />
                 )}
               </>
@@ -458,7 +458,7 @@ const DynamicLeadTimeDashboard = () => {
           </ScatterChart>
         </ResponsiveContainer>
 
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-auto gap-4 text-sm" style={{gridTemplateColumns: `repeat(${Math.min(itemTypes.length + 2, 6)}, minmax(200px, 1fr))`}}>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-auto gap-4 text-sm" style={{gridTemplateColumns: `repeat(${Math.min(itemTypes.length + 1, 5)}, minmax(200px, 1fr))`}}>
           {itemTypes.map((type, index) => {
             const typeData = data.filter(item => item.type === type);
             const isVisible = typeFilters[type];
@@ -477,22 +477,14 @@ const DynamicLeadTimeDashboard = () => {
             );
           })}
           
-          {(showP85 || showP95) && filteredData.length > 0 && (
-            <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-              <h3 className="font-semibold text-orange-800 mb-2">Percentis</h3>
-              {showP85 && <p>P85: {p85Value} dias</p>}
-              {showP95 && <p>P95: {p95Value} dias</p>}
-            </div>
-          )}
-          
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
             <h3 className="font-semibold text-gray-800 mb-2">Resumo Geral</h3>
-            <p>Total: {data.length} itens</p>
-            <p>Tipos: {itemTypes.length}</p>
-            <p>Fonte: Arquivo CSV</p>
             {filteredData.length > 0 && (
               <p>Lead Time Médio: {Math.round(filteredData.reduce((sum, item) => sum + item.leadTime, 0) / filteredData.length)} dias</p>
             )}
+            <p>Total: {data.length} itens</p>
+            <p>Tipos: {itemTypes.length}</p>
+            <p>Fonte: Arquivo CSV</p>
           </div>
         </div>
 
