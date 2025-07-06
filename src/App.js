@@ -246,7 +246,7 @@ const DynamicLeadTimeDashboard = () => {
   return (
     <div className="w-full h-screen bg-gray-50 p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Lead Time Dashboard - Tipos Dinâmicos</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Dispersão do Lead Time</h1>
         
         <div className="mb-4">
           <div className="flex justify-between items-center flex-wrap gap-4">
