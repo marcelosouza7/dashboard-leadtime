@@ -11,6 +11,7 @@ const DynamicLeadTimeDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [csvUploaded, setCsvUploaded] = useState(false);
+  const [fileName, setFileName] = useState('');
 
   // Cores predefinidas e automáticas
   const getColorForType = (type, index) => {
@@ -68,6 +69,9 @@ const DynamicLeadTimeDashboard = () => {
         setLoading(false);
         return;
       }
+      
+      // Salvar nome do arquivo
+      setFileName(file.name);
       
       const csvContent = await file.text();
       await processCSV(csvContent);
@@ -195,6 +199,7 @@ const DynamicLeadTimeDashboard = () => {
     const tryAutoLoad = async () => {
       try {
         const csvContent = await window.fs.readFile('BaseClaude.csv', { encoding: 'utf8' });
+        setFileName('BaseClaude.csv');
         await processCSV(csvContent);
         setCsvUploaded(true);
       } catch (err) {
@@ -321,6 +326,7 @@ const DynamicLeadTimeDashboard = () => {
               setItemTypes([]);
               setTypeFilters({});
               setError(null);
+              setFileName('');
             }}
             className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2"
           >
@@ -484,7 +490,7 @@ const DynamicLeadTimeDashboard = () => {
             )}
             <p>Total: {data.length} itens</p>
             <p>Tipos: {itemTypes.length}</p>
-            <p>Fonte: Arquivo CSV</p>
+            <p>Fonte: {fileName || 'Arquivo CSV'}</p>
           </div>
         </div>
 
