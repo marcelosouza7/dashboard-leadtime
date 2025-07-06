@@ -313,7 +313,23 @@ const DynamicLeadTimeDashboard = () => {
               textAnchor="middle"
               height={60}
               stroke="#666"
-              tickCount={7}
+              ticks={(() => {
+                if (filteredData.length === 0) return [];
+                
+                // Gerar ticks para cada mês no período dos dados
+                const minDate = new Date(Math.min(...filteredData.map(d => d.timestamp)));
+                const maxDate = new Date(Math.max(...filteredData.map(d => d.timestamp)));
+                
+                const ticks = [];
+                const current = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+                
+                while (current <= maxDate) {
+                  ticks.push(current.getTime());
+                  current.setMonth(current.getMonth() + 1);
+                }
+                
+                return ticks;
+              })()}
             />
             <YAxis 
               type="number" 
