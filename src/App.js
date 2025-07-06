@@ -103,11 +103,9 @@ const DynamicLeadTimeDashboard = () => {
     if (missingColumns.length > 0) {
       throw new Error(
         `❌ Estrutura do CSV inválida!\n\n` +
-        `Colunas obrigatórias faltando: ${missingColumns.join(', ')}\n\n` +
-        `Estrutura esperada:\n` +
-        `ID, Tipo de Item, Commited Date, Closed Date\n\n` +
-        `Estrutura encontrada:\n` +
-        `${headers.join(', ')}`
+        `Colunas obrigatórias faltando:\n${missingColumns.join(', ')}\n\n` +
+        `Estrutura esperada:\nID, Tipo de Item, Commited Date, Closed Date\n\n` +
+        `Estrutura encontrada:\n${headers.join(', ')}`
       );
     }
 
@@ -301,8 +299,9 @@ const DynamicLeadTimeDashboard = () => {
           </div>
           
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-              {error}
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+              <div className="font-semibold mb-2">Erro na validação:</div>
+              <pre className="whitespace-pre-wrap">{error}</pre>
             </div>
           )}
         </div>
