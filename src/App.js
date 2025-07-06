@@ -312,7 +312,21 @@ const DynamicLeadTimeDashboard = () => {
   return (
     <div className="w-full h-screen bg-gray-50 p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Dispersão do Lead Time</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Dispersão do Lead Time</h1>
+          <button
+            onClick={() => {
+              setCsvUploaded(false);
+              setData([]);
+              setItemTypes([]);
+              setTypeFilters({});
+              setError(null);
+            }}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2"
+          >
+            ⬅️ Importar Novo CSV
+          </button>
+        </div>
         
         <div className="mb-4">
           <div className="flex justify-between items-center flex-wrap gap-4">
