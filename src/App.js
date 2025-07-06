@@ -62,6 +62,13 @@ const DynamicLeadTimeDashboard = () => {
       setLoading(true);
       setError(null);
       
+      // Validar extensão do arquivo
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        setError('❌ Arquivo inválido! Por favor, selecione apenas arquivos .csv');
+        setLoading(false);
+        return;
+      }
+      
       const csvContent = await file.text();
       await processCSV(csvContent);
       setCsvUploaded(true);
@@ -86,30 +93,90 @@ const DynamicLeadTimeDashboard = () => {
       console.warn('Avisos no parse CSV:', parsed.errors);
     }
 
+    // Validar estrutura do CSV
+    const requiredColumns = ['ID', 'Tipo de Item', 'Commited Date', 'Closed Date'];
+    const headers = parsed.meta.fields || [];
+    
+    // Verificar se todas as colunas obrigatórias estão presentes
+    const missingColumns = requiredColumns.filter(col => !headers.includes(col));
+    
+    if (missingColumns.length > 0) {
+      throw new Error(
+        `❌ Estrutura do CSV inválida!\n\n` +
+        `Colunas obrigatórias faltando: ${missingColumns.join(', ')}\n\n` +
+        `Estrutura esperada:\n` +
+        `ID, Tipo de Item, Commited Date, Closed Date\n\n` +
+        `Estrutura encontrada:\n` +
+        `${headers.join(', ')}`
+      );
+    }
+
+    // Verificar se há dados válidos
+    const validRows = parsed.data.filter(row => 
+      row.ID && 
+      row['Tipo de Item'] && 
+      row['Commited Date'] && 
+      row['Closed Date']
+    );
+
+    if (validRows.length === 0) {
+      throw new Error(
+        `❌ Nenhum dado válido encontrado!\n\n` +
+        `Verifique se o CSV possui:\n` +
+        `• Pelo menos uma linha de dados\n` +
+        `• Valores preenchidos em todas as colunas obrigatórias\n` +
+        `• Datas no formato correto (YYYY-MM-DD)`
+      );
+    }
+
+    if (validRows.length < parsed.data.length) {
+      console.warn(`Atenção: ${parsed.data.length - validRows.length} linhas foram ignoradas por dados incompletos`);
+    }
+
     // Processar dados e calcular lead time
-    const processedData = parsed.data
-      .filter(row => row.ID && row['Tipo de Item'] && row['Commited Date'] && row['Closed Date'])
-      .map(row => {
-        const id = String(row.ID).trim();
-        const type = String(row['Tipo de Item']).trim();
-        const commitedDate = new Date(String(row['Commited Date']).trim());
-        const closedDate = new Date(String(row['Closed Date']).trim());
-        
-        // Calcular lead time: (Closed Date - Commited Date) + 1
-        const timeDiff = closedDate.getTime() - commitedDate.getTime();
-        const leadTime = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
-        
-        return {
-          id,
-          type,
-          commitedDate,
-          closedDate,
-          leadTime,
-          dateFormatted: closedDate.toLocaleDateString('pt-BR'),
-          timestamp: closedDate.getTime()
-        };
-      })
-      .sort((a, b) => a.timestamp - b.timestamp);
+    const processedData = validRows.map(row => {
+      const id = String(row.ID).trim();
+      const type = String(row['Tipo de Item']).trim();
+      
+      // Validar e converter datas
+      const commitedDate = new Date(String(row['Commited Date']).trim());
+      const closedDate = new Date(String(row['Closed Date']).trim());
+      
+      // Verificar se as datas são válidas
+      if (isNaN(commitedDate.getTime()) || isNaN(closedDate.getTime())) {
+        throw new Error(
+          `❌ Data inválida encontrada!\n\n` +
+          `Linha com ID: ${id}\n` +
+          `Commited Date: ${row['Commited Date']}\n` +
+          `Closed Date: ${row['Closed Date']}\n\n` +
+          `Use o formato: YYYY-MM-DD (ex: 2025-01-15)`
+        );
+      }
+      
+      // Verificar se Closed Date >= Commited Date
+      if (closedDate < commitedDate) {
+        throw new Error(
+          `❌ Data inconsistente encontrada!\n\n` +
+          `Linha com ID: ${id}\n` +
+          `Closed Date (${row['Closed Date']}) é anterior ao Commited Date (${row['Commited Date']})\n\n` +
+          `A data de conclusão deve ser igual ou posterior à data de início.`
+        );
+      }
+      
+      // Calcular lead time: (Closed Date - Commited Date) + 1
+      const timeDiff = closedDate.getTime() - commitedDate.getTime();
+      const leadTime = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+      
+      return {
+        id,
+        type,
+        commitedDate,
+        closedDate,
+        leadTime,
+        dateFormatted: closedDate.toLocaleDateString('pt-BR'),
+        timestamp: closedDate.getTime()
+      };
+    }).sort((a, b) => a.timestamp - b.timestamp);
 
     // Extrair tipos únicos
     const uniqueTypes = [...new Set(processedData.map(item => item.type))];
